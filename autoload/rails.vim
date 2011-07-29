@@ -740,6 +740,10 @@ function! s:readable_calculate_file_type() dict abort
     let r = "log"
   elseif e == "css" || e =~ "s[ac]ss" || e == "less"
     let r = "stylesheet-".e
+  elseif e == "js" && !(f =~ 'spec')
+    let r = "javascript"
+  elseif e == "js" && f =~ 'spec'
+    let r = "javascript_spec"
   elseif e == "js"
     let r = "javascript"
   elseif e == "coffee"
@@ -3073,10 +3077,10 @@ function! s:readable_related(...) dict abort
       let migration = "db/migrate/".get(candidates,0,migrations[0]).".rb"
     endif
     return migration . (exists('l:lastmethod') && lastmethod != '' ? '#'.lastmethod : '')
-  elseif f =~ '\<application\.js$'
-    return "app/helpers/application_helper.rb"
+  elseif self.type_name('javascript_spec')
+    return s:sub(s:sub(f, 'spec/javascripts', 'public/javascripts'), '_spec.js', '.js')."\n"
   elseif self.type_name('javascript')
-    return "public/javascripts/application.js"
+    return s:sub(s:sub(f, 'public/javascripts', 'spec/javascripts'), '.js', '_spec.js')."\n"
   elseif self.type_name('db/schema')
     return self.app().migration('')
   elseif self.type_name('view')
