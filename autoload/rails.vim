@@ -3081,6 +3081,13 @@ function! s:readable_related(...) dict abort
     return s:sub(s:sub(f, 'spec/javascripts', 'public/javascripts'), '_spec.js', '.js')."\n"
   elseif self.type_name('javascript')
     return s:sub(s:sub(f, 'public/javascripts', 'spec/javascripts'), '.js', '_spec.js')."\n"
+
+  " Adds support for cucumber alternate files
+  elseif self.type_name('cucumber-feature')
+    return s:sub(s:sub(f, 'features', 'features/step_definitions'), '.feature', '_steps.rb')."\n"
+  elseif self.type_name('cucumber-steps')
+    return s:sub(s:sub(f, 'features/step_definitions', 'features'), '_steps.rb', '.feature')."\n"
+
   elseif self.type_name('db/schema')
     return self.app().migration('')
   elseif self.type_name('view')
