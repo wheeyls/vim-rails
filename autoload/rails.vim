@@ -694,12 +694,14 @@ function! s:readable_calculate_file_type() dict abort
     else
       let r = "model"
     endif
-  elseif f =~ '\<app/views/layouts\>.*\.'
-    let r = "view-layout-" . e
-  elseif f =~ '\<\%(app/views\|components\)/.*/_\k\+\.\k\+\%(\.\k\+\)\=$'
-    let r = "view-partial-" . e
-  elseif f =~ '\<app/views\>.*\.' || f =~ '\<components/.*/.*\.'.s:viewspattern().'$'
-    let r = "view-" . e
+  elseif !(f =~ 'javascripts')
+    if f =~ '\<app/views/layouts\>.*\.'
+      let r = "view-layout-" . e
+    elseif f =~ '\<\%(app/views\|components\)/.*/_\k\+\.\k\+\%(\.\k\+\)\=$'
+      let r = "view-partial-" . e
+    elseif f =~ '\<app/views\>.*\.' || f =~ '\<components/.*/.*\.'.s:viewspattern().'$'
+      let r = "view-" . e
+    endif
   elseif f =~ '\<test/unit/.*_test\.rb$'
     let r = "test-unit"
   elseif f =~ '\<test/functional/.*_test\.rb$'
