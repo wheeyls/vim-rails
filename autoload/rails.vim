@@ -676,7 +676,7 @@ function! s:readable_calculate_file_type() dict abort
     let r = "metal"
   elseif f =~ '\<app/mailers/.*\.rb'
     let r = "mailer"
-  elseif f =~ '\<app/models/'
+  elseif f =~ '\<app/models/*rb'
     let top = join(s:readfile(full_path,50),"\n")
     let class = matchstr(top,'\<Acti\w\w\u\w\+\%(::\h\w*\)\+\>')
     if class == "ActiveResource::Base"
