@@ -3100,9 +3100,15 @@ function! s:readable_related(...) dict abort
     endif
     return migration . (exists('l:lastmethod') && lastmethod != '' ? '#'.lastmethod : '')
   elseif self.type_name('javascript_spec')
-    return s:sub(s:sub(f, 'spec/javascripts', 'public/javascripts'), '_spec.js', '.js')."\n"
+    return s:sub(s:sub(f, 'spec/javascripts', 'app/assets/javascripts'), '_spec.js', '.js')."\n"
   elseif self.type_name('javascript')
-    return s:sub(s:sub(f, 'public/javascripts', 'spec/javascripts'), '.js', '_spec.js')."\n"
+    if f =~ 'public/javascripts'
+      let to_replace = 'public/javascripts'
+    else
+      let to_replace = 'app/assets/javascripts'
+    endif
+    let replace_with = 'spec/javascripts'
+    return s:sub(s:sub(f, to_replace, replace_with), '.js', '_spec.js')."\n"
 
   " Adds support for cucumber alternate files
   elseif self.type_name('cucumber-feature')
