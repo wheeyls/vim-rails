@@ -662,7 +662,7 @@ function! s:readable_calculate_file_type() dict abort
     let r = "metal"
   elseif f =~ '\<app/mailers/.*\.rb'
     let r = "mailer"
-  elseif f =~ '\<app/models/'
+  elseif f =~ '\<app/models/*rb'
     let top = join(s:readfile(full_path,50),"\n")
     let class = matchstr(top,'\<Acti\w\w\u\w\+\%(::\h\w*\)\+\>')
     if class == "ActiveResource::Base"
@@ -680,12 +680,14 @@ function! s:readable_calculate_file_type() dict abort
     else
       let r = "model"
     endif
-  elseif f =~ '\<app/views/.*/_\k\+\.\k\+\%(\.\k\+\)\=$'
-    let r = "view-partial-" . e
-  elseif f =~ '\<app/views/layouts\>.*\.'
-    let r = "view-layout-" . e
-  elseif f =~ '\<app/views\>.*\.'
-    let r = "view-" . e
+  elseif !(f =~ 'javascripts')
+    elseif f =~ '\<app/views/.*/_\k\+\.\k\+\%(\.\k\+\)\=$'
+      let r = "view-partial-" . e
+    elseif f =~ '\<app/views/layouts\>.*\.'
+      let r = "view-layout-" . e
+    elseif f =~ '\<app/views\>.*\.'
+      let r = "view-" . e
+    endif
   elseif f =~ '\<test/unit/.*_test\.rb$'
     let r = "test-unit"
   elseif f =~ '\<test/functional/.*_test\.rb$'
@@ -730,6 +732,10 @@ function! s:readable_calculate_file_type() dict abort
     let r = "log"
   elseif e == "css" || e =~ "s[ac]ss" || e == "less"
     let r = "stylesheet-".e
+  elseif e == "js" && !(f =~ 'spec')
+    let r = "javascript"
+  elseif e == "js" && f =~ 'spec'
+    let r = "javascript_spec"
   elseif e == "js"
     let r = "javascript"
   elseif e == "coffee"
@@ -3129,10 +3135,23 @@ function! s:readable_related(...) dict abort
       let migration = "db/migrate/".get(candidates,0,migrations[0]).".rb"
     endif
     return migration . (exists('l:lastmethod') && lastmethod != '' ? '#'.lastmethod : '')
-  elseif f =~ '\<application\.js$'
-    return "app/helpers/application_helper.rb"
+  elseif self.type_name('javascript_spec')
+    return s:sub(s:sub(f, 'spec/javascripts', 'app/assets/javascripts'), '_spec.js', '.js')."\n"
   elseif self.type_name('javascript')
-    return "public/javascripts/application.js"
+    if f =~ 'public/javascripts'
+      let to_replace = 'public/javascripts'
+    else
+      let to_replace = 'app/assets/javascripts'
+    endif
+    let replace_with = 'spec/javascripts'
+    return s:sub(s:sub(f, to_replace, replace_with), '.js', '_spec.js')."\n"
+
+  " Adds support for cucumber alternate files
+  elseif self.type_name('cucumber-feature')
+    return s:sub(s:sub(f, 'features', 'features/step_definitions'), '.feature', '_steps.rb')."\n"
+  elseif self.type_name('cucumber-steps')
+    return s:sub(s:sub(f, 'features/step_definitions', 'features'), '_steps.rb', '.feature')."\n"
+
   elseif self.type_name('db/schema')
     return self.app().migration('')
   elseif self.type_name('view')
